@@ -43,10 +43,31 @@ ON FebSales.orderid = cust.order_id
 WHERE FebSales.quantity>2;
 
 
-select 
-count(cust.acctnum), 
-avg(quantity*price)
-FROM BIT_DB.FebSales Feb
-LEFT JOIN BIT_DB.customers cust
-ON FEB.orderid=cust.order_id
-WHERE Feb.Quantity>2
+--Practice with order dates and %
+SELECT orderdate
+FROM BIT_DB.FebSales
+WHERE orderdate between '02/13/19 00:00' AND '02/18/19 00:00'
+
+SELECT location
+FROM BIT_DB.FebSales 
+WHERE orderdate = '02/18/19 01:35'
+
+SELECT sum(quantity)
+FROM BIT_DB.FebSales 
+WHERE orderdate like '02/18/19%'
+
+SELECT distinct Product
+FROM BIT_DB.FebSales
+WHERE Product like '%Batteries%'
+
+SELECT distinct Product, Price
+FROM BIT_DB.FebSales 
+WHERE Price like '%.99'
+
+--List all the products sold in Los Angeles in February, and include how many of each were sold.
+
+SELECT Product, SUM(Quantity) AS Total_sold
+FROM BIT_DB.FebSales
+WHERE location LIKE '%Los Angeles%'
+GROUP BY Product
+ORDER BY Total_sold DESC;
