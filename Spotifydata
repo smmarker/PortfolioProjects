@@ -1,0 +1,76 @@
+# For this project, I downloaded Spotify data from Kaggle.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+--create a new table in the BIT_DB database
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+--Test the database to see if the data loaded properly
+Select *
+from bit_db.spotifydata
+limit 5;
+
+
+--What are the top 10 artists based on popularity?
+SELECT artist_name, popularity
+FROM bit_db.spotifydata
+ORDER BY popularity DESC
+LIMIT 10;
+
+--What are the top ten artists based on number of entries?
+SELECT artist_name, COUNT(artist_name) AS entries
+FROM bit_db.spotifydata
+GROUP BY artist_name
+ORDER BY entries DESC
+LIMIT 10;
+
+--What artist released the shortest song? longest song?
+SELECT artist_name, duration_ms
+FROM BIT_DB.Spotifydata
+ORDER BY duration_ms ASC
+LIMIT 1;
+
+SELECT artist_name, duration_ms
+FROM BIT_DB.Spotifydata
+ORDER BY duration_ms DESC
+LIMIT 1;
+
+--What is the average song tempo of the most popular artists?
+SELECT artist_name, AVG(popularity), AVG(tempo)
+FROM bit_db.spotifydata
+GROUP BY artist_name, popularity
+ORDER BY avg(popularity) DESC
+LIMIT 10;
+
+--What is the average danceability of the most popular artists?
+SELECT artist_name, AVG(danceability), popularity
+FROM bit_db.spotifydata
+WHERE popularity > 90
+GROUP BY artist_name
+ORDER BY popularity DESC
+
+--How many songs have a time signature that is not 4/4?
+SELECT COUNT(time_signature)
+FROM bit_db.spotifydata
+WHERE time_signature != 4;
+
+
