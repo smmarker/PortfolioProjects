@@ -1,0 +1,168 @@
+--Show Customers (their full names, customer ID, and country) who are not in the US. 
+SELECT FirstName, LastName, CustomerID, Country
+FROM chinook.customers
+WHERE Country<>'USA'
+
+ --Show only the Customers from Brazil
+SELECT FirstName, LastName, CustomerID, Country
+FROM chinook.customers
+WHERE Country='Brazil';
+
+--Find the Invoices of customers who are from Brazil. 
+--The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.
+SELECT FirstName, LastName, InvoiceID, Invoicedate, BillingCountry
+FROM chinook.customers
+JOIN chinook.invoices
+ON invoices.CustomerId=customers.CustomerId
+WHERE Country='Brazil';
+
+--Show the Employees who are Sales Agents
+SELECT FirstName, LastName, Title
+FROM chinook.employees
+WHERE title='Sales Support Agent';
+
+--Find a unique/distinct list of billing countries from the Invoice table
+--Put the list in alphabetical order
+SELECT DISTINCT BillingCountry
+FROM chinook.invoices
+ORDER BY BillingCountry
+
+--Provide a query that shows the invoices associated with each sales agent. 
+--The resulting table should include the Sales Agent's full name.
+SELECT i.InvoiceId, e.FirstName, e.LastName
+FROM employees e
+JOIN customers c
+ON c.SupportRepID=e.EmployeeID
+JOIN invoices i
+ON i.CustomerID=c.CustomerID
+
+--Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers
+SELECT i.total, c.firstname AS Cust_Firstname, c.lastname AS Cust_Lastname, c.country, e.firstname AS Agent_FirstName, e.lastname AS Agent_LastName
+FROM invoices i
+JOIN customers c
+ON i.customerid=c.customerid
+JOIN employees e
+ON e.EmployeeID=c.SupportRepID
+
+--How many Invoices were there in 2009?
+SELECT COUNT(invoiceid) AS total_invoices
+FROM invoices
+WHERE InvoiceDate like '%2009%';
+
+--What are the total sales for 2009
+SELECT ROUND(SUM(total), 2) AS Total_Sales
+FROM invoices
+WHERE InvoiceDate like '%2009%';
+
+--Write a query that includes the purchased track name with each invoice line ID
+SELECT t.name, i.invoicelineid
+FROM tracks t
+JOIN invoice_items i
+ON t.trackid=i.trackid
+
+--Write a query that includes the purchased track name AND artist name with each invoice line ID
+SELECT t.name, t.composer, i.invoicelineid
+FROM tracks t
+JOIN invoice_items i
+ON t.trackid=i.trackid
+
+--Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre
+SELECT t.name AS track_name, a.title AS album_name, m.name AS media_type, g.name AS genre
+FROM tracks t
+JOIN albums a
+ON t.albumid=a.albumid
+JOIN media_types m
+ON m.mediatypeid=t.mediatypeid
+JOIN genres g
+ON g.genreid=t.genreid
+--WHERE genre!='Rock'; 
+
+--Show the total sales made by each sales agent
+SELECT e.firstname AS Agent_FirstName, e.lastname AS Agent_LastName, ROUND(SUM(i.total), 2) AS invoice_total
+FROM employees e
+JOIN customers c
+ON e.employeeid=c.supportrepid
+JOIN invoices i
+ON i.customerid=c.customerid
+GROUP BY e.employeeid
+
+--Which sales agent made the most dollars in sales in 2009
+SELECT e.firstname AS Agent_FirstName, e.lastname AS Agent_LastName, ROUND(SUM(i.total), 2) AS invoice_total
+FROM employees e
+JOIN customers c
+ON e.employeeid=c.supportrepid
+JOIN invoices i
+ON i.customerid=c.customerid
+WHERE i.invoicedate LIKE'%2009%'
+
+--which genres had the most sales in dollars (not units) overall?
+SELECT g.name AS genre_name, ROUND(SUM(i.unitprice*i.quantity), 2) AS sales
+FROM genres g
+JOIN tracks t
+ON g.genreid=t.genreid
+JOIN invoice_items i
+ON i.trackid=t.trackid
+GROUP BY genre_name
+ORDER BY sales DESC;
+
+--Which 3 customers spent the most money?
+SELECT c.firstname, c.lastname, ROUND(SUM(i.total), 2) AS total
+FROM customers c
+JOIN invoices i
+ON c.customerid=i.customerid
+GROUP BY i.customerid
+ORDER BY total DESC
+LIMIT 3;
+
+--Which 5 countries spent the most money?
+SELECT c.country, ROUND(SUM(i.total), 2) as TOTAL
+FROM customers c
+JOIN invoices i
+ON c.customerid=i.customerid
+GROUP BY c.country
+ORDER BY total DESC
+LIMIT 5;
+
+--OR
+SELECT billingcountry, ROUND(SUM(total), 2) as TOTAL
+FROM invoices
+GROUP BY billingcountry
+ORDER BY total DESC
+LIMIT 5;
+
+--which tracks had the highest sales volume?
+SELECT t.name, t.unitprice, COUNT(ii.trackid) AS tracks_sold, COUNT(ii.trackid)*t.unitprice AS sales
+FROM tracks t
+JOIN invoice_items ii
+ON t.trackid=ii.trackid
+GROUP BY t.trackid
+ORDER BY sales DESC
+
+--which composers are the best selling by sales volume?
+SELECT t.composer, t.unitprice, COUNT(ii.trackid) AS tracks_sold, COUNT(ii.trackid)*t.unitprice AS sales
+FROM tracks t
+JOIN invoice_items ii
+ON t.trackid=ii.trackid
+WHERE t.composer IS NOT NULL
+GROUP BY t.composer
+ORDER BY sales DESC
+
+--which albums are the best selling by sales volume?
+SELECT t.composer, a.title, COUNT(ii.trackid)*t.unitprice AS sales 
+FROM tracks t
+JOIN invoice_items ii
+ON t.trackid=ii.trackid
+JOIN albums a
+ON t.albumid=a.albumid
+GROUP BY a.title
+ORDER BY sales DESC
+
+--Best selling album by tracks sold
+SELECT a.title, t.composer, COUNT(ii.trackid) AS tracks_sold
+FROM tracks t
+JOIN invoice_items ii
+ON t.trackid=ii.trackid
+JOIN albums a
+ON t.albumid=a.albumid
+GROUP BY a.title
+ORDER BY tracks_sold DESC
