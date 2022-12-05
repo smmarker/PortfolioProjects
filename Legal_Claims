@@ -1,0 +1,66 @@
+SELECT *
+FROM dbo.legal_claims$;
+
+/*how many cases by admission year?*/
+SELECT count(*) AS Count,
+year(admission_date) as Year
+from dbo.legal_claims$
+group by year(admission_date)
+order by year(admission_date);
+
+/*how many cases by dismissal year?*/
+SELECT count(*) AS Count,
+year(dismissal_date) as Year
+from dbo.legal_claims$
+group by year(dismissal_date)
+order by year(dismissal_date);
+
+/*claim amount by admission year*/
+Select sum(claim_amount) AS claims, 
+year(admission_date) as Year
+from dbo.legal_claims$
+group by year(admission_date)
+order by year(admission_date);
+
+/*cases by area*/
+SELECT count(area) AS area_count,
+area
+from dbo.legal_claims$
+group by area;
+
+/*cases by area by year*/
+SELECT count(area) AS area_count,
+area,
+year(CLAIM_START_DATE) as Year
+from dbo.legal_claims$
+group by area, year(CLAIM_START_DATE)
+ORDER BY year(CLAIM_START_DATE);
+
+/*cases by city*/
+SELECT CITY_SUBSIDIARIES, 
+COUNT(*)
+FROM DBO.legal_claims$
+GROUP BY CITY_SUBSIDIARIES;
+
+/*DIFFERENCE BETWEEN CLAIM AND AMOUNT PAID*/
+SELECT LAWSUIT_NUMBER,
+CLAIM_AMOUNT,
+AMOUNT_PAID,
+CLAIM_AMOUNT-AMOUNT_PAID AS CLAIM_PAID_DIFFERENCE
+FROM DBO.legal_claims$
+WHERE PHASE='CLOSED';
+
+/*CASES CLOSED BY YEAR*/
+SELECT COUNT(PHASE) AS NO_CLOSED,
+year(CLAIM_START_DATE) as Year
+FROM DBO.legal_claims$
+WHERE PHASE='CLOSED'
+GROUP BY year(CLAIM_START_DATE);
+
+/*CASES REPRESENTING PLAINTIFF OR DEFENDANT BY YEAR*/
+SELECT SUM(CASE WHEN PLAINTIFF_OR_DEFENDANT='PLAINTIFF' THEN 1 ELSE 0 END) AS PLAINTIFF,
+SUM(CASE WHEN PLAINTIFF_OR_DEFENDANT='DEFENDANT' THEN 1 ELSE 0 END) AS DEFENDANT,
+YEAR(CLAIM_START_DATE) AS YEAR
+FROM DBO.legal_claims$
+GROUP BY YEAR(CLAIM_START_DATE);
+
